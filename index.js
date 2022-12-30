@@ -27,9 +27,9 @@ async function run() {
             .db("tasks-tracker")
             .collection("myTasks");
 
-        const completedTasksCollections = client
+        const myAlbumsCollection = client
             .db("tasks-tracker")
-            .collection("completedTasks");
+            .collection("myAlbums");
 
         // post my tasks
         app.post("/myTasks", async (req, res) => {
@@ -119,6 +119,45 @@ async function run() {
                 options
             );
             res.send(result);
+        });
+
+        // delete task
+        app.delete("/delete/:id", async (req, res) => {
+            const id = req.params.id;
+
+            const query = { _id: ObjectId(id) };
+            const result = await myTasksCollections.deleteOne(query);
+            console.log(result);
+            res.send(result);
+        });
+
+        // post my albums
+        app.post("/album", async (req, res) => {
+            // receive from client
+            const myAlbum = req.body;
+            console.log(myAlbum);
+            const query = {};
+
+            // store in db
+            const result = await myAlbumsCollection.insertOne(myAlbum);
+            res.send(result);
+        });
+
+        // get all albums
+        app.get("/myAlbums", async (req, res) => {
+            const query = {};
+
+            const tasks = await myAlbumsCollection.find(query).toArray();
+            res.send(tasks);
+        });
+
+        // get my albums by user
+        app.get("/myAlbums/:email", async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+
+            const tasks = await myAlbumsCollection.find(query).toArray();
+            res.send(tasks);
         });
     } finally {
     }
